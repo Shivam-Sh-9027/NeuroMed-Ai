@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facial Recognition Attendance System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Login & Register Pages */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+        }
+
+        .auth-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .auth-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .navbar {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .navbar h2 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-logout {
+            padding: 10px 20px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #ff3838;
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card.blue .icon {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-card.green .icon {
+            background: rgba(46, 213, 115, 0.2);
+        }
+
+        .stat-card.orange .icon {
+            background: rgba(255, 159, 67, 0.2);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .value {
+            color: #333;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .camera-section {
+            text-align: center;
+        }
+
+        video {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 15px;
+            background: #000;
+            margin-bottom: 20px;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-camera {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-start {
+            background: #2ed573;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #26de81;
+        }
+
+        .btn-stop {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-capture {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-capture:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .attendance-table {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-present {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+        }
+
+        .scanning {
+            position: relative;
+        }
+
+        .scanning::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            animation: scan 2s infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(480px); }
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="page active">
+        <div class="auth-container">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <div class="auth-icon">📷</div>
+                    <h1>Welcome Back</h1>
+                    <p>Facial Recognition Attendance System</p>
+                </div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+                <div class="auth-footer">
+                    Don't have an account? <a href="#" onclick="showPage('registerPage')">Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Page -->
+    <div id="registerPage" class="page">
+        <div class="auth-container">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <div class="auth-icon">👤</div>
+                    <h1>Create Account</h1>
+                    <p>Join our attendance system</p>
+                </div>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="regName" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="regEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="regPassword" placeholder="Create a password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select id="regDepartment" required>
+                            <option value="">Select Department</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Sales">Sales</option>
+                            <option value="HR">Human Resources</option>
+                            <option value="Finance">Finance</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </form>
+                <div class="auth-footer">
+                    Already have an account? <a href="#" onclick="showPage('loginPage')">Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboardPage" class="page">
+        <div class="container dashboard">
+            <div class="navbar">
+                <h2>📊 Attendance Dashboard</h2>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">JD</div>
+                    <div>
+                        <div style="font-weight: 600; color: #333;" id="userName">John Doe</div>
+                        <div style="font-size: 12px; color: #666;" id="userDept">Engineering</div>
+                    </div>
+                    <button class="btn-logout" onclick="logout()">Logout</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="icon">👥</div>
+                    <h3>Total Employees</h3>
+                    <div class="value" id="totalUsers">0</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="icon">✅</div>
+                    <h3>Present Today</h3>
+                    <div class="value" id="presentToday">0</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="icon">📅</div>
+                    <h3>Total Records</h3>
+                    <div class="value" id="totalRecords">0</div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="card camera-section">
+                    <h3>📷 Mark Attendance</h3>
+                    <video id="video" autoplay playsinline></video>
+                    <div class="camera-controls">
+                        <button class="btn-camera btn-start" onclick="startCamera()">Start Camera</button>
+                        <button class="btn-camera btn-capture" onclick="captureAttendance()" id="captureBtn" disabled>Capture Face</button>
+                        <button class="btn-camera btn-stop" onclick="stopCamera()">Stop</button>
+                    </div>
+                </div>
+
+                <div class="card attendance-table">
+                    <h3>📋 Recent Attendance</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Time</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let users = [
+            { id: 1, name: 'John Doe', email: 'john@example.com', password: 'password', department: 'Engineering' },
+            { id: 2, name: 'Jane Smith', email: 'jane@example.com', password: 'password', department: 'Marketing' }
+        ];
+
+        let attendance = [
+            { id: 1, userId: 1, name: 'John Doe', date: '2025-11-30', time: '09:15 AM', status: 'Present' },
+            { id: 2, userId: 2, name: 'Jane Smith', date: '2025-11-30', time: '09:20 AM', status: 'Present' },
+            { id: 3, userId: 1, name: 'John Doe', date: '2025-11-29', time: '09:10 AM', status: 'Present' }
+        ];
+
+        let currentUser = null;
+        let videoStream = null;
+
+        // Page Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                loadDashboard();
+                showPage('dashboardPage');
+            } else {
+                alert('Invalid email or password!');
+            }
+        });
+
+        // Register
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const department = document.getElementById('regDepartment').value;
+
+            const newUser = {
+                id: users.length + 1,
+                name: name,
+                email: email,
+                password: password,
+                department: department
+            };
+
+            users.push(newUser);
+            currentUser = newUser;
+            loadDashboard();
+            showPage('dashboardPage');
+        });
+
+        // Load Dashboard
+        function loadDashboard() {
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userDept').textContent = currentUser.department;
+            document.getElementById('userAvatar').textContent = currentUser.name.split(' ').map(n => n[0]).join('');
+
+            updateStats();
+            loadAttendanceTable();
+        }
+
+        // Update Statistics
+        function updateStats() {
+            const today = new Date().toISOString().split('T')[0];
+            const presentToday = attendance.filter(a => a.date === today).length;
+
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('presentToday').textContent = presentToday;
+            document.getElementById('totalRecords').textContent = attendance.length;
+        }
+
+        // Load Attendance Table
+        function loadAttendanceTable() {
+            const tbody = document.getElementById('attendanceTable');
+            tbody.innerHTML = '';
+
+            const recentAttendance = attendance.slice(0, 5);
+            
+            recentAttendance.forEach(record => {
+                const row = `
+                    <tr>
+                        <td>${record.name}</td>
+                        <td>${record.time}</td>
+                        <td>${record.date}</td>
+                        <td><span class="status-badge status-present">${record.status}</span></td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Camera Functions
+        async function startCamera() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                document.getElementById('video').srcObject = videoStream;
+                document.getElementById('captureBtn').disabled = false;
+            } catch (err) {
+                alert('Camera access denied. Please allow camera permissions.');
+            }
+        }
+
+        function stopCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                document.getElementById('video').srcObject = null;
+                videoStream = null;
+                document.getElementById('captureBtn').disabled = true;
+            }
+        }
+
+        function captureAttendance() {
+            const video = document.getElementById('video');
+            video.classList.add('scanning');
+            document.getElementById('captureBtn').disabled = true;
+
+            setTimeout(() => {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                const dateString = now.toISOString().split('T')[0];
+
+                const newAttendance = {
+                    id: attendance.length + 1,
+                    userId: currentUser.id,
+                    name: currentUser.name,
+                    date: dateString,
+                    time: timeString,
+                    status: 'Present'
+                };
+
+                attendance.unshift(newAttendance);
+                updateStats();
+                loadAttendanceTable();
+                video.classList.remove('scanning');
+                document.getElementById('captureBtn').disabled = false;
+                alert('✅ Attendance marked successfully!');
+                stopCamera();
+            }, 2000);
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            stopCamera();
+            showPage('loginPage');
+            document.getElementById('loginForm').reset();
+        }
+    </script>
+</body>
+</html>

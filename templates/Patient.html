@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Patient Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 24px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff3838 0%, #ff9f43 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 24px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-item {
+            transition: all 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .nav-item:hover {
+            background: linear-gradient(135deg, #ff9ff3 0%, #54a0ff 100%);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            animation: zoomIn 0.5s ease;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .step-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .step-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .chat-bubble {
+            border-radius: 20px;
+            padding: 10px 15px;
+            margin: 5px 0;
+            max-width: 70%;
+        }
+
+        .chat-left {
+            background: #f0f0f0;
+            align-self: flex-start;
+        }
+
+        .chat-right {
+            background: #667eea;
+            color: white;
+            align-self: flex-end;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <header class="hero-bg text-white p-6 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-bold flex items-center">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/d210adfd-ff1d-46e9-810f-ee2db9062c2b.png"
+                    alt="Stylized medical cross symbol in blue and white representing health and patient care"
+                    class="w-10 h-10 mr-3 rounded-full shadow-md">
+                Patient Dashboard
+            </h1>
+            <div class="flex items-center space-x-4">
+                <button id="logoutBtn"
+                    class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg shadow-md transition-colors"
+                    onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto grid grid-cols-12 gap-6 p-6">
+        <!-- Navigation -->
+        <aside class="col-span-3 bg-white rounded-2xl shadow-xl p-6">
+            <h2 class="text-xl font-semibold text-center mb-6 text-gray-800">Quick Access</h2>
+            <ul class="space-y-3">
+                <li class="nav-item p-3 text-gray-700 font-medium rounded-lg cursor-pointer active"
+                    data-section="profile">My Profile</li>
+                <li class="nav-item p-3 text-gray-700 font-medium rounded-lg cursor-pointer"
+                    data-section="appointments">My Appointments</li>
+                <li class="nav-item p-3 text-gray-700 font-medium rounded-lg cursor-pointer" data-section="records">
+                    Health Records</li>
+                <li class="nav-item p-3 text-gray-700 font-medium rounded-lg cursor-pointer" data-section="reminders">
+                    Reminders</li>
+                <li class="nav-item p-3 text-gray-700 font-medium rounded-lg cursor-pointer" data-section="billing">
+                    Billing</li>
+                <li class="nav-item p-3 text-gray-700 font-medium rounded-lg cursor-pointer" data-section="messaging">
+                    Messaging</li>
+                <li class="nav-item p-3 text-gray-700 font-medium rounded-lg cursor-pointer" data-section="wellness">
+                    Wellness Tracker</li>
+                <li class="nav-item p-3 text-gray-700 font-medium rounded-lg cursor-pointer" data-section="emergency">
+                    Emergency Help</li>
+                <li class="nav-item p-3 text-gray-700 font-medium rounded-lg cursor-pointer" data-section="settings">
+                    Account Settings</li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="col-span-9 space-y-6">
+            <!-- Profile Section -->
+            <section id="profile" class="card p-8">
+                <h2 class="text-2xl font-bold text-purple-600 mb-6">Your Profile</h2>
+                <div class="flex items-center space-x-6">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/f61d72ab-5f9a-4b12-872c-96f92e12f835.png"
+                        alt="Professional portrait photo of patient John Doe with a calm expression wearing a button-up shirt"
+                        class="w-32 h-32 rounded-full shadow-lg border-4 border-purple-200">
+                    <div class="space-y-2">
+                        <p class="text-lg"><strong>Name:</strong> John Doe</p>
+                        <p class="text-lg"><strong>Age:</strong> 35</p>
+                        <p class="text-lg"><strong>Gender:</strong> Male</p>
+                        <p class="text-lg"><strong>Patient ID:</strong> MRN123456</p>
+                        <p class="text-lg"><strong>Phone:</strong> +1 555-123-4567</p>
+                        <p class="text-lg"><strong>Emergency Contact:</strong> Jane Doe (Wife) - +1 555-987-6543</p>
+                        <button class="btn-primary mt-2">Edit Profile</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Appointments Section -->
+            <section id="appointments" class="card p-8" hidden>
+                <h2 class="text-2xl font-bold text-purple-600 mb-6">Your Appointments</h2>
+                <ul class="space-y-4" id="appointmentsList"></ul>
+                <div class="flex space-x-4 mt-4">
+                    <button class="btn-primary" onclick="openModal('appointmentModal')">Schedule New</button>
+                    <button class="btn-primary" onclick="openTelehealth()">Join Telehealth</button>
+                </div>
+            </section>
+
+            <!-- Medical Records Section -->
+            <section id="records" class="card p-8" hidden>
+                <h2 class="text-2xl font-bold text-purple-600 mb-6">Health Records</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Recent Visits</h3>
+                        <ul class="space-y-2" id="visitsList"></ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Lab Results</h3>
+                        <ul class="space-y-2" id="labList"></ul>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-3">Prescriptions</h3>
+                    <ul class="space-y-2" id="prescriptionList"></ul>
+                    <button class="btn-primary mt-4">Request Refill</button>
+                </div>
+            </section>
+
+            <!-- Reminders Section -->
+            <section id="reminders" class="card p-8" hidden>
+                <h2 class="text-2xl font-bold text-purple-600 mb-6">Reminders & Alerts</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Medication Reminders</h3>
+                        <ul class="space-y-2" id="medRemindersList"></ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Test Alerts</h3>
+                        <ul class="space-y-2 bg-yellow-50 p-4 rounded-lg" id="testAlertsList"></ul>
+                    </div>
+                </div>
+                <button class="btn-primary mt-4" onclick="setupReminders()">Manage Reminders</button>
+            </section>
+
+            <!-- Billing Section -->
+            <section id="billing" class="card p-8" hidden>
+                <h2 class="text-2xl font-bold text-purple-600 mb-6">Billing & Payments</h2>
+                <p class="mb-4"><strong>Outstanding Balance:</strong> $150 due July 15, 2024</p>
+                <p class="mb-4"><strong>Insurance:</strong> HealthCare Plus - Full coverage</p>
+                <div class="flex space-x-4">
+                    <button class="btn-primary">Pay Now</button>
+                    <button class="btn-primary">Download Invoice</button>
+                </div>
+            </section>
+
+            <!-- Messaging Section -->
+            <section id="messaging" class="card p-8" hidden>
+                <h2 class="text-2xl font-bold text-purple-600 mb-6">Secure Messaging</h2>
+                <div class="flex flex-col h-64 overflow-y-auto mb-4" id="chatBox">
+                    <div class="flex flex-col space-y-2">
+                        <div class="chat-bubble chat-left">Dr. Smith: Your lab results are ready.</div>
+                        <div class="chat-bubble chat-right">Thanks, I'll review them soon.</div>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <input type="text" id="messageInput" class="flex-1 p-3 border rounded-lg"
+                        placeholder="Type your message..." />
+                    <button class="btn-primary" onclick="sendMessage()">Send</button>
+                </div>
+                <div class="mt-4">
+                    <input type="file" id="fileUpload" multiple class="border p-2 rounded">
+                    <ul id="uploadedList" class="mt-2 space-y-1"></ul>
+                </div>
+            </section>
+
+            <!-- Wellness Section -->
+            <section id="wellness" class="card p-8" hidden>
+                <h2 class="text-2xl font-bold text-purple-600 mb-6">Wellness Tracker</h2>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-lg font-semibold">Daily Goals</h3>
+                        <div class="space-y-2">
+                            <div>
+                                <span>Steps: 8,000 / 10,000</span>
+                                <div class="step-bar">
+                                    <div class="step-fill" style="width: 80%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <span>Sleep: 7.5 / 8 hours</span>
+                                <div class="step-bar">
+                                    <div class="step-fill" style="width: 90%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <span>Water: 6 / 8 glasses</span>
+                                <div class="step-bar">
+                                    <div class="step-fill" style="width: 75%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold">Health Tips</h3>
+                        <ul class="list-disc pl-6 space-y-1">
+                            <li>Drink at least 8 glasses of water daily</li>
+                            <li>Walk 10,000 steps to stay active</li>
+                            <li>Get 7-8 hours of sleep each night</li>
+                        </ul>
+                    </div>
+                </div>
+                <button class="btn-primary mt-4">Log Activity</button>
+            </section>
+
+            <!-- Emergency Section -->
+            <section id="emergency" class="card p-8" hidden>
+                <h2 class="text-2xl font-bold text-purple-600 mb-6">Emergency Services</h2>
+                <div class="flex space-x-4">
+                    <button class="btn-danger px-6 py-3" onclick="callEmergency()">Call Ambulance</button>
+                    <button class="btn-danger px-6 py-3" onclick="shareRecords()">Share Medical Records</button>
+                </div>
+                <p class="mt-4 text-gray-600">In case of emergency, call 911 or use the buttons above to connect
+                    immediately.</p>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="card p-8" hidden>
+                <h2 class="text-2xl font-bold text-purple-600 mb-6">Account Settings</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Change Password</label>
+                        <input type="password" class="w-full p-3 border rounded-lg" placeholder="New Password">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Privacy Settings</label>
+                        <select class="w-full p-3 border rounded-lg">
+                            <option>Share with all care team</option>
+                            <option>Share only with primary doctor</option>
+                            <option>No sharing</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary">Save Settings</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Scheduling -->
+    <div id="appointmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('appointmentModal')">&times;</span>
+            <h2 class="text-xl font-bold mb-4">Schedule New Appointment</h2>
+            <form onsubmit="handleAppointment(event)">
+                <input type="text" id="docName" placeholder="Doctor Name" class="w-full p-3 mb-3 border rounded"
+                    required>
+                <input type="text" id="dept" placeholder="Department" class="w-full p-3 mb-3 border rounded" required>
+                <input type="datetime-local" id="apptTime" class="w-full p-3 mb-3 border rounded" required>
+                <input type="url" id="telLink" placeholder="Telehealth Link (optional)"
+                    class="w-full p-3 mb-3 border rounded">
+                <button type="submit" class="btn-primary w-full">Schedule</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const sectionId = item.dataset.section;
+                document.querySelectorAll('section').forEach(sec => sec.hidden = true);
+                document.getElementById(sectionId).hidden = false;
+            });
+        });
+
+        // Dummy Data
+        function loadData() {
+            // Appointments
+            document.getElementById('appointmentsList').innerHTML = `
+        <li class="p-4 bg-gray-50 rounded-lg flex justify-between">
+          <div>
+            <p class="font-semibold">Dr. Smith - Cardiology</p>
+            <p>July 10, 2024 at 10:30 AM</p>
+            <a href="#" class="text-blue-500">Telehealth Link</a>
+          </div>
+          <div class="space-y-1">
+            <button class="btn-danger">Reschedule</button>
+            <button class="btn-danger">Cancel</button>
+          </div>
+        </li>`;
+
+            // Health Records
+            document.getElementById('visitsList').innerHTML = `<li>May 1: Routine Checkup - All normal</li><li>March 15: Skin Check - Medicine prescribed</li>`;
+            document.getElementById('labList').innerHTML = `<li>May 2: Blood Test - Normal</li>`;
+            document.getElementById('prescriptionList').innerHTML = `<li>Atorvastatin: 10mg daily (Active)</li>`;
+
+            // Reminders
+            document.getElementById('medRemindersList').innerHTML = `<li>Take Blood Pressure Med at 8 AM</li>`;
+            document.getElementById('testAlertsList').innerHTML = `<li>Blood Test due this week</li>`;
+        }
+
+        // Modal Functions
+        function openModal(modalId) { document.getElementById(modalId).style.display = 'block'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+        // Appointment Handling
+        function handleAppointment(e) {
+            e.preventDefault();
+            const doc = document.getElementById('docName').value;
+            const dept = document.getElementById('dept').value;
+            const time = new Date(document.getElementById('apptTime').value).toLocaleString();
+            alert(`Appointment scheduled with ${doc} in ${dept} at ${time}`);
+            closeModal('appointmentModal');
+        }
+
+        // Telehealth
+        function openTelehealth() { alert('Opening Telehealth link...'); }
+
+        // Reminders
+        function setupReminders() { alert('Reminder setup feature coming soon!'); }
+
+        // Messaging
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const chatBox = document.getElementById('chatBox');
+            if (input.value.trim()) {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'chat-bubble chat-right';
+                msgDiv.textContent = input.value;
+                chatBox.appendChild(msgDiv);
+                input.value = '';
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        // File Upload
+        document.getElementById('fileUpload').addEventListener('change', e => {
+            const files = e.target.files;
+            const list = document.getElementById('uploadedList');
+            for (let file of files) {
+                const li = document.createElement('li');
+                li.textContent = `Uploaded: ${file.name}`;
+                list.appendChild(li);
+            }
+        });
+
+        // Emergency
+        function callEmergency() { alert('Dialing emergency services...'); }
+        function shareRecords() { alert('Sharing medical records...'); }
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                alert('Logged out successfully.');
+                // Redirect or handle logout
+            }
+        }
+
+        // Load data on page load
+        window.onload = loadData;
+    </script>
+</body>
+
+</html>

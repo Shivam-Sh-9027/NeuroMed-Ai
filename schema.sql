@@ -1,0 +1,130 @@
+CREATE DATABASE IF NOT EXISTS neuromed_ai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE neuromed_ai;
+
+SET default_storage_engine=INNODB;
+
+-- USERS TABLE
+CREATE TABLE IF NOT EXISTS users (
+  id INT NOT NULL AUTO_INCREMENT,
+  first_name VARCHAR(150) NOT NULL,
+  last_name VARCHAR(150),
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash VARBINARY(255) NOT NULL,
+  role ENUM('doctor','patient') NOT NULL,
+  phone VARCHAR(50),
+  profile_photo VARCHAR(255),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(id)
+) ENGINE=InnoDB;
+
+-- DOCTOR TABLE (FIXED)
+CREATE TABLE IF NOT EXISTS doctor (
+  id INT NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL UNIQUE,
+  specialization VARCHAR(150),
+  license_number VARCHAR(150) UNIQUE,
+  experience INT,
+  clinic_name VARCHAR(255),
+  clinic_address TEXT,
+  working_hours VARCHAR(255),
+  PRIMARY KEY(id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- PATIENT TABLE (FIXED)
+CREATE TABLE IF NOT EXISTS patient (
+  id INT NOT NULL AUTO_INCREMENT,
+  user_id INT UNIQUE,
+  age INT,
+  gender VARCHAR(30),
+  blood_type VARCHAR(10),
+  emergency_name VARCHAR(255),
+  emergency_phone VARCHAR(50),
+  last_visit DATE,
+  PRIMARY KEY(id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- APPOINTMENT TABLE
+CREATE TABLE IF NOT EXISTS appointment (
+  id INT NOT NULL AUTO_INCREMENT,
+  patient_id INT NOT NULL,
+  doctor_id INT,
+  department VARCHAR(150),
+  appt_time DATETIME,
+  telehealth_link VARCHAR(500),
+  status VARCHAR(50) DEFAULT 'pending',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(id),
+  FOREIGN KEY (patient_id) REFERENCES patient(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (doctor_id) REFERENCES doctor(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- MESSAGE TABLE
+CREATE TABLE IF NOT EXISTS message (
+  id INT NOT NULL AUTO_INCREMENT,
+  sender_id INT,
+  receiver_id INT,
+  content TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(id),
+  FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- PRESCRIPTION TABLE
+CREATE TABLE IF NOT EXISTS prescription (
+  id INT NOT NULL AUTO_INCREMENT,
+  patient_id INT NOT NULL,
+  doctor_id INT,
+  medication TEXT,
+  dosage VARCHAR(255),
+  instructions TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(id),
+  FOREIGN KEY (patient_id) REFERENCES patient(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (doctor_id) REFERENCES doctor(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- REPORTS TABLE
+CREATE TABLE IF NOT EXISTS reports (
+  id INT NOT NULL AUTO_INCREMENT,
+  patient_id INT NOT NULL,
+  report_type VARCHAR(150),
+  file_path VARCHAR(500),
+  date DATE,
+  status VARCHAR(50),
+  PRIMARY KEY(id),
+  FOREIGN KEY (patient_id) REFERENCES patient(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- VISIT HISTORY TABLE
+CREATE TABLE IF NOT EXISTS visit_history (
+  id INT NOT NULL AUTO_INCREMENT,
+  patient_id INT NOT NULL,
+  title VARCHAR(255),
+  date DATE,
+  notes TEXT,
+  PRIMARY KEY(id),
+  FOREIGN KEY (patient_id) REFERENCES patient(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- AI ANALYSIS TABLE
+CREATE TABLE IF NOT EXISTS ai_analysis (
+  id INT NOT NULL AUTO_INCREMENT,
+  patient_id INT NOT NULL,
+  probability INT,
+  result VARCHAR(255),
+  risk_level VARCHAR(100),
+  details TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(id),
+  FOREIGN KEY (patient_id) REFERENCES patient(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+
+ALTER TABLE patient 
+ADD COLUMN doctor_id INT NULL;
+
+ALTER TABLE patient
+ADD FOREIGN KEY (doctor_id) REFERENCES doctor(id);
